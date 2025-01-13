@@ -98,7 +98,7 @@ const updateProfile = async (req, res) => {
 const checkAuth=(req,res)=>{
   try{
     const user=req.user;
-    return res.status(200).json({success: true,msg: "Some error occured", user: user})
+    return res.status(200).json({success: true,msg: "User Successfully updated", user: user})
   }
   catch{
     return res.status(500).json({

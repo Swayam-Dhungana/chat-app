@@ -1,22 +1,29 @@
 import UserContext from "./createContext";
 
 const UserContextProvider=({children})=>{
-    const checkAuth=async()=>{
-        const response=(fetch('http://localhost:5000/api/auth/check'),{
-            method: 'GET',
+    const getUsers=async()=>{
+        const response=await fetch('http://localhost:5000/api/messages/users',{
+            method:'GET',
             headers:{
-                "Content-Type":"application/json",
-                "auth-token": localStorage.getItem('auth-token')
-            },
-        }
-    )
-    const json=await response.json()
-    if (json.success)return json.user
+                'Content-Type':'application/json',
+                'auth-token':localStorage.getItem('auth-token')
+            }
+        })
+        const users=await response.json()
+        return users
     }
- 
-
-
-    return (<UserContext.Provider value={checkAuth}>
+    const getUserData=async()=>{
+        const response=await fetch('http://localhost:5000/api/auth/check',{
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json',
+                'auth-token':localStorage.getItem('auth-token')
+            }
+        })
+        const data=await response.json()
+        return data
+    }
+    return (<UserContext.Provider value={{getUserData, getUsers}}>
         {children}
     </UserContext.Provider>
     )

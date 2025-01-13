@@ -20,6 +20,7 @@ const Navbar = () => {
   return (
     <div className="h-[60px] w-full flex justify-between items-center bg-gradient-to-r from-purple-900 to-blue-900 shadow-md px-4">
       {/* Left Section: Logo and Name */}
+        <Link to={'/'}>
       <div className="flex items-center">
         <img
           src="talk.avif"
@@ -30,6 +31,7 @@ const Navbar = () => {
           Talken
         </p>
       </div>
+        </Link>
 
       {/* Right Section: Settings */}
       <div className='flex gap-3'>

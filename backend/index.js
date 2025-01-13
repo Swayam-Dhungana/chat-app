@@ -6,7 +6,7 @@ const cors=require('cors')
 const app=express()
 connectMongo();
 app.use(cors())
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 app.use('/api/auth',require('./src/routes/auth.route'))
 app.use('/api/messages',require('./src/routes/message.route'))
 
