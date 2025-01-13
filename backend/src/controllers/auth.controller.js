@@ -3,7 +3,7 @@ const User = require('../models/User');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { cloudinary } = require('../lib/cloudinary');
+const cloudinary  = require('../lib/cloudinary');
 
 const signup= async (req, res) => {
     let success=false
@@ -73,25 +73,32 @@ const login=async(req,res)=>{
   }
 }
 
-const updateProfile=async(req,res)=>{
-  try{
-    const {profilePic}=req.body;
-    const userId=req.user._id;
-    if(!profilePic)return res.status(400).json({success: false , msg: "Profile pic is required"})
-      const uploadResponse=await cloudinary.uploader.upload(profilePic)
-      const updatedUser=await User.findByIdAndUpdate(userId, {
-        profilePic: uploadResponse.secure_url
-      },{new:true})
-      res.status(200).json({success: true, msg: updatedUser})
+const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    if (!profilePic) {
+      return res.status(400).json({ success: false, msg: "Profile pic is required" });
     }
-  catch(error){
-    return res.status(500).json({success: false, msg:"Internal server Error"})
+    const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+      folder: "user_profiles",
+      transformation: { width: 300, height: 300, crop: "limit" }, // Resize image
+    });
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    );
+    res.status(200).json({ success: true, msg: updatedUser });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, msg: "Internal server Error" });
   }
-}
+};
 
 const checkAuth=(req,res)=>{
   try{
-    return res.status(200).json({success: true, msg:"Authenticated"})
+    const user=req.user;
+    return res.status(200).json({success: true,msg: "Some error occured", user: user})
   }
   catch{
     return res.status(500).json({

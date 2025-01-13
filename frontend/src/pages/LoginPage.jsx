@@ -99,7 +99,7 @@ const LoginPage = () => {
             {/* Right Side: Grid and Text */}
             <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6">
                 <h2 className="text-xl md:text-2xl font-semibold text-purple-300 mb-4 md:mb-6">
-                    Unlock the Magic
+                    Login to join and Communicate
                 </h2>
                 <div className="grid grid-cols-3 gap-2 md:gap-4">
                     {Array.from({ length: 9 }).map((_, index) => (

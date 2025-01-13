@@ -1,5 +1,5 @@
-import React from 'react'
-import {  Routes, Route } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import {  Routes, Route, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import SignUpPage from './pages/SignUpPage'
@@ -8,6 +8,13 @@ import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
 
 const App = () => {
+ const navigator=useNavigate();
+ useEffect(()=>{
+    const token=localStorage.getItem('auth-token')
+    if(!token && location!="/settings"){
+      navigator('/login')
+    }
+  }, [navigator])
   return (
     <div className='overflow-hidden'>
       <Navbar/>

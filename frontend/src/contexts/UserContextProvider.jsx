@@ -11,7 +11,7 @@ const UserContextProvider=({children})=>{
         }
     )
     const json=await response.json()
-    if (json.success)return true
+    if (json.success)return json.user
     }
  
 
