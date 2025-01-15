@@ -1,6 +1,9 @@
+import { useState } from "react";
 import UserContext from "./createContext";
 
 const UserContextProvider=({children})=>{
+    const [sender, setSender] = useState('');
+    const [reciever, setReciever] = useState('')
     const getUsers=async()=>{
         const response=await fetch('http://localhost:5000/api/messages/users',{
             method:'GET',
@@ -23,7 +26,7 @@ const UserContextProvider=({children})=>{
         const data=await response.json()
         return data
     }
-    return (<UserContext.Provider value={{getUserData, getUsers}}>
+    return (<UserContext.Provider value={{getUserData, getUsers, sender, setSender, reciever, setReciever}}>
         {children}
     </UserContext.Provider>
     )

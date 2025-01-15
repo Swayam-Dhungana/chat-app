@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import {  Routes, Route, useNavigate } from 'react-router-dom'
+import {  Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import SignUpPage from './pages/SignUpPage'
@@ -8,10 +8,11 @@ import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
 
 const App = () => {
+  const location=useLocation()
  const navigator=useNavigate();
  useEffect(()=>{
     const token=localStorage.getItem('auth-token')
-    if(!token && location!="/settings"){
+    if(!token && location.pathname!="/signup"){
       navigator('/login')
     }
   }, [navigator])

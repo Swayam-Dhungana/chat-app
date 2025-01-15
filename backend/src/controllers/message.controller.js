@@ -1,5 +1,6 @@
 const User=require('../models/User')
 const Message=require('../models/Message')
+const cloudinary  = require('../lib/cloudinary');
 const getUsersForSidebar=async(req,res)=>{
     try{
         const loggedInUser=req.user._id
@@ -10,23 +11,30 @@ const getUsersForSidebar=async(req,res)=>{
         return res.status(500).json({success: false, msg: "Internal Server Error"})
     }
 }
-const getMessages=async(req,res)=>{
-    let success=false
-    try{
-        const userToChatId=req.params._id
-        const senderId=req.user._id
-        const messages=await Message.find({
-            $or:[
-                {senderId: senderId, receiverId: userToChatId},
-                {senderId: userToChatId, receiverId: senderId}
+const getMessages = async (req, res) => {
+    let success = false; // Initialize success flag to false
+    try {
+        const userToChatId = req.params.id; // Extract the ID of the user to chat with from request parameters
+        const senderId = req.user._id; // Extract the sender's ID from the authenticated user object
+
+        // Fetch messages where either:
+        // - The sender is the authenticated user and the receiver is the user to chat with, or
+        // - The sender is the user to chat with and the receiver is the authenticated user
+        const messages = await Message.find({
+            $or: [
+                { senderId: senderId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: senderId }
             ]
-        })
-        return res.status(200).json(messages)
+        });
+
+        // Respond with success and the fetched messages
+        return res.status(200).json({ success: true, messages: messages });
+    } catch (error) {
+        // Handle errors by responding with a 500 status code and an error message
+        return res.status(500).json({ success: success, msg: "Internal Server Error" });
     }
-    catch{
-        return res.status(500).json({success: success, msg:"Internal Server Error"})
-    }
-}
+};
+
 
 const sendMessage=async(req,res)=>{
     let success=false;
@@ -37,7 +45,10 @@ const sendMessage=async(req,res)=>{
 
         let imageUrl;
         if(image){
-            const uploadResponse=await cloudinary.uploader.upload(image);
+             const uploadResponse = await cloudinary.uploader.upload(image, {
+                  folder: "user_messages",
+                  transformation: { width: 300, height: 300, crop: "limit" }, // Resize image
+                });
             imageUrl=uploadResponse.secure_url;
         }
         const newMessage= await Message.create({

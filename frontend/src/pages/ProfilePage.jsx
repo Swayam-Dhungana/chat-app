@@ -2,13 +2,8 @@ import React, { useEffect, useState } from "react";
 
 const ProfilePage = () => {
   const [height, setHeight] = useState("100vh");
-  const [creds, setCreds] = useState({
-    profilePic: "",
-    username: "",
-    email: "",
-    createdAt: "",
-    active: "online",
-  });
+  const [creds, setCreds] = useState(null); // Initially null to indicate loading
+  const [loading, setLoading] = useState(true); // Loading state
 
   // Fetch user data
   const getUserData = async () => {
@@ -52,6 +47,7 @@ const ProfilePage = () => {
           active: "online",
         });
       }
+      setLoading(false); // Stop loading
     });
   }, []);
 
@@ -96,67 +92,83 @@ const ProfilePage = () => {
   return (
     <div className="w-screen flex justify-center items-center" style={{ height }}>
       <div className="w-2/3 bg-black rounded-xl p-8 text-white">
-        <div className="flex flex-col items-center">
-          {/* Profile Picture Upload */}
-          <div className="relative mb-6">
-            <img
-              src={creds.profilePic || "default.webp"}
-              alt="Profile"
-              className="w-32 h-32 rounded-full object-cover border-2 border-gray-600 cursor-pointer"
-              onClick={() => document.getElementById("profileImageInput").click()}
-            />
-            <input
-              type="file"
-              id="profileImageInput"
-              className="hidden"
-              accept="image/*"
-              onChange={handleImageUpload}
-            />
-          </div>
-
-          {/* Profile Information */}
-          <div className="w-full max-w-md">
-            <div className="mb-4">
-              <label className="block text-gray-400 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={creds.username}
-                readOnly
-                className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-400 mb-1">Email</label>
-              <input
-                type="email"
-                value={creds.email}
-                readOnly
-                className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-400 mb-1">Joined On</label>
-              <input
-                type="text"
-                value={formatDate(creds.createdAt)}
-                readOnly
-                className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-400 mb-1">Account Status</label>
-              <input
-                type="text"
-                value={creds.active}
-                readOnly
-                className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
-              />
+        {loading ? (
+          // Skeleton Loader
+          <div className="animate-pulse">
+            <div className="flex flex-col items-center">
+              <div className="w-32 h-32 rounded-full bg-gray-700 mb-6"></div>
+              <div className="w-full max-w-md">
+                <div className="mb-4 h-8 bg-gray-700 rounded"></div>
+                <div className="mb-4 h-8 bg-gray-700 rounded"></div>
+                <div className="mb-4 h-8 bg-gray-700 rounded"></div>
+                <div className="mb-4 h-8 bg-gray-700 rounded"></div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          // Actual Profile Page
+          <div className="flex flex-col items-center">
+            {/* Profile Picture Upload */}
+            <div className="relative mb-6">
+              <img
+                src={creds.profilePic || "default.webp"}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-2 border-gray-600 cursor-pointer"
+                onClick={() => document.getElementById("profileImageInput").click()}
+              />
+              <input
+                type="file"
+                id="profileImageInput"
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
+            </div>
+
+            {/* Profile Information */}
+            <div className="w-full max-w-md">
+              <div className="mb-4">
+                <label className="block text-gray-400 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={creds.username}
+                  readOnly
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-400 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={creds.email}
+                  readOnly
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-400 mb-1">Joined On</label>
+                <input
+                  type="text"
+                  value={formatDate(creds.createdAt)}
+                  readOnly
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-400 mb-1">Account Status</label>
+                <input
+                  type="text"
+                  value={creds.active}
+                  readOnly
+                  className="w-full p-2 rounded bg-gray-800 border border-gray-600 text-gray-300"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
