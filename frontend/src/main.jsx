@@ -7,11 +7,9 @@ import UserContextProvider from './contexts/UserContextProvider.jsx'
 
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <UserContextProvider>
     <BrowserRouter>
     <App />
     </BrowserRouter>
     </UserContextProvider>
-  </StrictMode>,
 )

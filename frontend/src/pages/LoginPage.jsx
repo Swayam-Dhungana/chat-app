@@ -3,7 +3,7 @@ import UserContext from '../contexts/createContext';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
-    const { checkAuth } = useContext(UserContext);
+    const { connectSocket } = useContext(UserContext);
     const [creds, setCreds] = useState({ email: "", password: "" });
     const [height, setHeight] = useState("100vh");
     const [isNavigated, setIsNavigated] = useState(false);  // Prevent multiple navigations
@@ -47,6 +47,7 @@ const LoginPage = () => {
                 localStorage.setItem('auth-token', json.msg);
                 setIsNavigated(true);  // Set flag to prevent future navigation
                 navigate('/'); // Navigate to homepage after successful login
+                connectSocket()
             }
         } catch (error) {
             console.error("Error logging in:", error);

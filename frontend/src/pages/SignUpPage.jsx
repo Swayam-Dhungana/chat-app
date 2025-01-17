@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import UserContext from '../contexts/createContext';
 
 const SignUpPage = () => {
     const [creds, setCreds] = useState({ username: "", email: "", password: "" });
+    const {connectSocket}=useContext(UserContext)
     const [height, setHeight] = useState("100vh");
     const navigator=useNavigate();
     
@@ -35,6 +37,7 @@ const SignUpPage = () => {
             alert(json.msg);
         } else {
             localStorage.setItem('auth-token', json.msg);
+            connectSocket
         }
     };
 
