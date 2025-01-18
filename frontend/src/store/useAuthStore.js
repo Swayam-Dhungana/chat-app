@@ -1,15 +1,15 @@
 import {create} from "zustand"
 import { axiosInstance } from "../lib/axios"
 import toast from "react-hot-toast"
-
-export const useAuthStore=create((set)=>({
+import {io} from "socket.io-client"
+export const useAuthStore=create((set,get)=>({
     authUser: null,
     isCheckingAuth: true,
     isLoggingIn:false,
     isUpdatingProfile: false,
     isSigningUp: false,
     onlineUsers:[],
-
+    socket:null,
     checkAuth: async()=>{
         try{
             const res=await axiosInstance.get("/auth/check",{
@@ -18,6 +18,7 @@ export const useAuthStore=create((set)=>({
                 }
             })
             set({authUser:res.data.user})
+            get().connectSocket()
         }catch(error){
             console.log("Error in check Auth", error)
             set({authUser: null});
@@ -33,14 +34,33 @@ export const useAuthStore=create((set)=>({
             toast.success('Account Created Sucessfully')
             set({authUser: res.data.data})
             localStorage.setItem('auth-token',res.data.msg)
-            console.log(data.msg)
+            get().connectSocket()
         }catch(error){
             toast.error(error.response.data.message)
         }finally{
             set({isSigningUp: false})
         }
     },
-    
+    connectSocket:()=>{
+        const {authUser}=get()
+        if(!authUser || get().socket?.connected)return;
+        const socket=io("http://localhost:5000",{
+            query:{
+                userId:authUser._id
+            }
+        });
+        socket.connect()
+        set({socket: socket})
+
+        socket.on('getOnlineUsers',(userIds)=>set({onlineUsers :userIds}))
+
+
+    },
+
+    disconnectSocket:()=>{
+        if(get().socket?.connected) get().socket.disconnected()
+    }
+    ,
     login:async(data)=>{
         set({isLoggingIn: true});
         try{
@@ -48,6 +68,7 @@ export const useAuthStore=create((set)=>({
             set({authUser: res.data.data});
             localStorage.setItem('auth-token',res.data.msg)
             toast.success('Logged in successfully!')
+            get().connectSocket()
         }catch(error){
             toast.error(error)
         }finally{
@@ -56,7 +77,8 @@ export const useAuthStore=create((set)=>({
     },
     logout:()=>{
         localStorage.removeItem('auth-token'),
-        authUser=null
+        authUser=null,
+        get().disconnectSocket()
     },
     updateProfile: async (data) => {
         set({ isUpdatingProfile: true });

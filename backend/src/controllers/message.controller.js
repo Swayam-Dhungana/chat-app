@@ -1,6 +1,7 @@
 const User=require('../models/User')
 const Message=require('../models/Message')
 const cloudinary  = require('../lib/cloudinary');
+const { getReceiverSocketId, io } = require('../lib/socket');
 const getUsersForSidebar=async(req,res)=>{
     try{
         const loggedInUser=req.user._id
@@ -57,8 +58,12 @@ const sendMessage=async(req,res)=>{
             text,
             image: imageUrl
         })
-
-        //Todo: realtime functionality goes here ==>socket.io
+        
+        const receiverSocketId=getReceiverSocketId(receiverId)
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit('newMessage', newMessage)
+        }
+        
         return res.status(201).json({success: true, msg: newMessage})
         }
         catch{
