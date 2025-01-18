@@ -1,31 +1,36 @@
 import React, { useEffect } from 'react'
-import {  Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import { Navigate, Route,Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import SignUpPage from './pages/SignUpPage'
 import LoginPage from './pages/LoginPage'
-import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
-
+import SettingsPage from './pages/SettingsPage'
+import { useAuthStore } from './store/useAuthStore'
+import {Loader} from 'lucide-react'
+import {Toaster} from 'react-hot-toast'
 const App = () => {
-  const location=useLocation()
- const navigator=useNavigate();
- useEffect(()=>{
-    const token=localStorage.getItem('auth-token')
-    if(!token && location.pathname!="/signup"){
-      navigator('/login')
-    }
-  }, [navigator])
+  const {checkAuth,authUser,isCheckingAuth}=useAuthStore()
+  useEffect(()=>{
+    checkAuth()
+  },[checkAuth])
+
+  if(isCheckingAuth && !authUser)return(
+    <div className='flex items-center justify-center h-screen'>
+      <Loader className='size-10 animate-spin'/>
+    </div>
+  )
   return (
-    <div className='overflow-hidden'>
+    <div>
       <Navbar/>
       <Routes>
-        <Route path='/' element={<HomePage />}/>
-        <Route path='/signup' element={<SignUpPage/>}/>
-        <Route path='/login' element={<LoginPage/>}/>
-        <Route path='/settings' element={<SettingsPage/>}/>
-        <Route path='/profile' element={<ProfilePage/>}/>
+        <Route path='/' element={authUser?<HomePage/>:<Navigate to={"/login"}/>}></Route>
+        <Route path='/signup' element={!authUser?<SignUpPage/>:<Navigate to={'/'}/>}></Route>
+        <Route path='/login' element={!authUser?<LoginPage/>:<Navigate to={'/'}/>}></Route>
+        <Route path='/profile' element={authUser?<ProfilePage/>:<Navigate to={'/login'}/>}></Route>
+        <Route path='/settings' element={<SettingsPage/>}></Route>
       </Routes>
+      <Toaster/>
     </div>
   )
 }

@@ -33,15 +33,19 @@ const signup= async (req, res) => {
     });
 
     if (!user) {
-      return res.status(500).json({success: success, msg: 'Error creating new user.' });
+      return res.status(400).json({success: success, msg: 'Error creating new user.' });
     }
 
     // Generate a token
     const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
       expiresIn: 60 * 60 * 24, // 24 hours
     });
-    success=true
-    return res.status(200).json({ success: success, msg: token });
+    return res.status(201).json({msg:token,data: {
+      _id:user._id,
+      username: user.username,
+      email: user.email,
+      profilePic: user.profilePic
+    }});
   } catch (error) {
     console.error(error);
     return res.status(500).json({success:success, msg: 'Server error.' });
@@ -64,10 +68,15 @@ const login=async(req,res)=>{
       const isValidPassword=await bcrypt.compare(password, user.password)
       if(!isValidPassword)return res.status(401).json({success: success, msg:"Invalid Username or Password"})
       success=true
-      const token=await jwt.sign({id: user._id}, process.env.SECRET_KEY,{
-        expiresIn: 60*60*24
+      const token=jwt.sign({id: user._id}, process.env.SECRET_KEY,{
+        expiresIn: 60*60*24*7
       })
-      return res.status(200).json({success: success, msg: token})
+      return res.status(200).json({msg: token, data:{
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePic: user.profilePic
+      }})
   }catch(error){
       return res.status(500).json({ msg: 'Server error.' });
   }

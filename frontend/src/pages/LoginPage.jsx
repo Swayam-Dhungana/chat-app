@@ -1,118 +1,119 @@
-import React, { useState, useEffect, useContext } from 'react';
-import UserContext from '../contexts/createContext';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import AuthImagePattern from "../components/AuthImagePattern";
+import { Link } from "react-router-dom";
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 
 const LoginPage = () => {
-    const { connectSocket } = useContext(UserContext);
-    const [creds, setCreds] = useState({ email: "", password: "" });
-    const [height, setHeight] = useState("100vh");
-    const [isNavigated, setIsNavigated] = useState(false);  // Prevent multiple navigations
-    const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const { login, isLoggingIn } = useAuthStore();
 
-    useEffect(() => {
-        const checkvalidity=async()=>{
-            if(localStorage.getItem('auth-token')){
-                navigate('/')
-            }
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    login(formData);
+  };
 
-        const navbarHeight = 60;
-        setHeight(`calc(100vh - ${navbarHeight}px)`);
-        checkvalidity()
-    }, [navigate]);  // Add isNavigated as a dependency to track state
-
-    const handleChange = (e) => {
-        setCreds({ ...creds, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: creds.email,
-                    password: creds.password,
-                }),
-            });
-
-            const json = await response.json();
-            if (!json.success) {
-                alert(json.msg);
-            } else {
-                localStorage.setItem('auth-token', json.msg);
-                setIsNavigated(true);  // Set flag to prevent future navigation
-                navigate('/'); // Navigate to homepage after successful login
-                connectSocket()
-            }
-        } catch (error) {
-            console.error("Error logging in:", error);
-            alert("Something went wrong. Please try again.");
-        }
-    };
-
-    return (
-        <div
-            className="w-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 text-indigo-300 overflow-hidden"
-            style={{ height }}
-        >
-            {/* Left Side: Login Form */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 md:p-10">
-                <form className="bg-indigo-950 p-6 md:p-8 rounded-lg shadow-2xl w-full md:w-3/4">
-                    <h2 className="text-2xl md:text-3xl font-bold text-purple-400 tracking-wide text-center mb-6 md:mb-8">
-                        Enter the Realm
-                    </h2>
-                    <div className="mb-4 md:mb-6">
-                        <label htmlFor="email" className="block text-purple-300 mb-2">Email:</label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
-                            value={creds.email}
-                            onChange={handleChange}
-                            className="block w-full p-3 rounded-lg bg-purple-800 text-indigo-200 outline-none focus:ring focus:ring-purple-500"
-                        />
-                    </div>
-                    <div className="mb-4 md:mb-6">
-                        <label htmlFor="password" className="block text-purple-300 mb-2">Password:</label>
-                        <input
-                            type="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            value={creds.password}
-                            onChange={handleChange}
-                            className="block w-full p-3 rounded-lg bg-purple-800 text-indigo-200 outline-none focus:ring focus:ring-purple-500"
-                        />
-                    </div>
-                    <button
-                        onClick={handleSubmit}
-                        className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-all duration-300"
-                    >
-                        Login
-                    </button>
-                </form>
+  return (
+    <div className="h-screen grid lg:grid-cols-2">
+      {/* Left Side - Form */}
+      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
+        <div className="w-full max-w-md space-y-8">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="flex flex-col items-center gap-2 group">
+              <div
+                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20
+              transition-colors"
+              >
+                <MessageSquare className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
+              <p className="text-base-content/60">Sign in to your account</p>
             </div>
+          </div>
 
-            {/* Right Side: Grid and Text */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6">
-                <h2 className="text-xl md:text-2xl font-semibold text-purple-300 mb-4 md:mb-6">
-                    Login to join and Communicate
-                </h2>
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
-                    {Array.from({ length: 9 }).map((_, index) => (
-                        <div
-                            key={index}
-                            className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-lg shadow-md transition-transform transform hover:scale-105"
-                        ></div>
-                    ))}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Email</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-base-content/40" />
                 </div>
+                <input
+                  type="email"
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
             </div>
-        </div>
-    );
-};
 
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-base-content/40" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+
+          <div className="text-center">
+            <p className="text-base-content/60">
+              Don&apos;t have an account?{" "}
+              <Link to="/signup" className="link link-primary">
+                Create account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Image/Pattern */}
+      <AuthImagePattern
+        title={"Welcome back!"}
+        subtitle={"Sign in to continue your conversations and catch up with your messages."}
+      />
+    </div>
+  );
+};
 export default LoginPage;

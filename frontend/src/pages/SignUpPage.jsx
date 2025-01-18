@@ -1,115 +1,146 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import UserContext from '../contexts/createContext';
+import React from 'react'
+import { useState } from 'react'
+import { useAuthStore } from '../store/useAuthStore'
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import AuthImagePattern from '../components/AuthImagePattern'
+import toast from 'react-hot-toast'
 
 const SignUpPage = () => {
-    const [creds, setCreds] = useState({ username: "", email: "", password: "" });
-    const {connectSocket}=useContext(UserContext)
-    const [height, setHeight] = useState("100vh");
-    const navigator=useNavigate();
-    
-    useEffect(()=>{
-        setHeight(`calc(100vh - 60px)`);
-        if(localStorage.getItem("auth-token")){
-            navigator('/')
-        }
-    })
+  const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState({
+    username: '',
+    email:'',
+    password:'',
+  })
+  const{signup, isSigningUp}=useAuthStore()
 
-    const handleChange = (e) => {
-        setCreds({ ...creds, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const response = await fetch('http://localhost:5000/api/auth/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: creds.username,
-                email: creds.email,
-                password: creds.password,
-            }),
-        });
-        const json = await response.json();
-        if (!json.success) {
-            alert(json.msg);
-        } else {
-            localStorage.setItem('auth-token', json.msg);
-            connectSocket
-        }
-    };
-
-    return (
-        <div
-            className="w-screen flex flex-col md:flex-row bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 text-indigo-300 overflow-hidden"
-            style={{ height }}
-        >
-            {/* Left Side: SignUp Form */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 md:p-10">
-                <form className="bg-indigo-950 p-6 md:p-8 rounded-lg shadow-2xl w-full md:w-3/4">
-                    <h2 className="text-2xl md:text-3xl font-bold text-purple-400 tracking-wide text-center mb-6 md:mb-8">
-                        Join the Realm
-                    </h2>
-                    <div className="mb-4 md:mb-6">
-                        <label htmlFor="username" className="block text-purple-300 mb-2">Username:</label>
-                        <input
-                            type="text"
-                            name="username"
-                            placeholder="Enter your username"
-                            value={creds.username}
-                            onChange={handleChange}
-                            className="block w-full p-3 rounded-lg bg-purple-800 text-indigo-200 outline-none focus:ring focus:ring-purple-500"
-                        />
-                    </div>
-                    <div className="mb-4 md:mb-6">
-                        <label htmlFor="email" className="block text-purple-300 mb-2">Email:</label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Enter your email"
-                            value={creds.email}
-                            onChange={handleChange}
-                            className="block w-full p-3 rounded-lg bg-purple-800 text-indigo-200 outline-none focus:ring focus:ring-purple-500"
-                        />
-                    </div>
-                    <div className="mb-4 md:mb-6">
-                        <label htmlFor="password" className="block text-purple-300 mb-2">Password:</label>
-                        <input
-                            type="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            value={creds.password}
-                            onChange={handleChange}
-                            className="block w-full p-3 rounded-lg bg-purple-800 text-indigo-200 outline-none focus:ring focus:ring-purple-500"
-                        />
-                    </div>
-                    <button
-                        onClick={handleSubmit}
-                        className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-all duration-300"
-                    >
-                        Sign Up
-                    </button>
-                </form>
+  const validateForm=()=>{
+    if (!formData.username.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 8) return toast.error("Password must be at least 8 characters");
+    return true;
+  }
+  const handleSubmit=(e)=>{
+    e.preventDefault()
+    const success=validateForm()
+    if(success===true) {
+      signup(formData)
+    }}
+  return (
+    <div className='min-h-screen grid lg:grid-cols-2'>
+      {/* Left side */}
+      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
+        <div className='w-full max-w-md space-y-8'>
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="flex flex-col items-center gap-2 group">
+              <div
+                className="size-12 rounded-xl bg-primary/10 flex items-center justify-center 
+              group-hover:bg-primary/20 transition-colors"
+              >
+                <MessageSquare className="size-6 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mt-2">Create Account</h1>
+              <p className="text-base-content/60">Get started with your free account</p>
             </div>
+          </div>
 
-            {/* Right Side: Grid and Text */}
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6">
-                <h2 className="text-xl md:text-2xl font-semibold text-purple-300 mb-4 md:mb-6">
-                    Unlock the Magic
-                </h2>
-                <div className="grid grid-cols-3 gap-2 md:gap-4">
-                    {Array.from({ length: 9 }).map((_, index) => (
-                        <div
-                            key={index}
-                            className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-lg shadow-md transition-transform transform hover:scale-105"
-                        ></div>
-                    ))}
+          <form onSubmit={handleSubmit} className='space-y-6'>
+          
+          <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Full Name</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="size-5 text-base-content/40" />
                 </div>
+                <input
+                  type="text"
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                />
+              </div>
             </div>
-        </div>
-    );
-};
 
-export default SignUpPage;
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Email</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="size-5 text-base-content/40" />
+                </div>
+                <input
+                  type="email"
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Password</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="size-5 text-base-content/40" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="size-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
+              {isSigningUp ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </form>
+          <div className="text-center">
+            <p className="text-base-content/60">
+              Already have an account?{" "}
+              <Link to="/login" className="link link-primary">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+      <AuthImagePattern
+      title="Join Our community"
+      subtitle="Connect with friends, share moments, and stay in touch with your family"
+      />
+    </div>
+  )
+}
+
+export default SignUpPage
