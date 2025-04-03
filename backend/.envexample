@@ -1,0 +1,6 @@
+NAME= Cloudinary-api-email
+PASSWORD=cloudinary-password
+SECRET_KEY=your_secret_key
+CLOUDINARY_CLOUD_NAME=xyz
+CLOUDINARY_API_KEY=Api_key
+CLOUDINARY_API_SECRET=Api_secret
